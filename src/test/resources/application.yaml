@@ -1,0 +1,5 @@
+spring:
+  activemq:
+    broker-url: vm://embedded-broker
+    packages:
+      trust-all: true
