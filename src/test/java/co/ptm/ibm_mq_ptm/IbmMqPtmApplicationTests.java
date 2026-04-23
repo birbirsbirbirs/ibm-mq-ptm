@@ -6,15 +6,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.client.RestTestClient;
 
-import static org.assertj.core.api.Assertions.assertThat;
 
+@AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableAutoConfiguration(exclude = { com.ibm.mq.spring.boot.MQAutoConfiguration.class })
 @ActiveProfiles("test")
@@ -25,7 +26,7 @@ class IbmMqPtmApplicationTests {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private RestTestClient restTestClient;
 
     @Autowired
     JmsTemplate jmsTemplate;
@@ -59,8 +60,15 @@ class IbmMqPtmApplicationTests {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> stringHttpEntity = new HttpEntity<>(body, httpHeaders);
-        ResponseEntity<String> exchange = restTemplate.exchange(url, HttpMethod.POST, stringHttpEntity, String.class);
-        assertThat(exchange.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String responseBody = restTestClient.post()
+                .uri(url)
+                .body(stringHttpEntity.getBody())
+                .headers(headers -> headers.addAll(stringHttpEntity.getHeaders()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
         String receivedMessage = jmsTemplate.receiveAndConvert("ptm").toString();
         System.out.println(receivedMessage);
 

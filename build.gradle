@@ -27,18 +27,22 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'com.ibm.mq:mq-jms-spring-boot-starter:4.0.5'
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
-
 	compileOnly 'org.projectlombok:lombok'
 
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation ('org.springframework.boot:spring-boot-starter-actuator-test'){
+		exclude group: 'com.vaadin.external.google', module: 'android-json'
+	}
+	testImplementation ('org.springframework.boot:spring-boot-starter-webmvc-test'){
+		exclude group: 'com.vaadin.external.google', module: 'android-json'
+	}
+	testImplementation 'org.springframework.boot:spring-boot-starter-activemq'
 	testImplementation "org.apache.activemq:activemq-broker:6.2.4"
+	testImplementation "org.apache.activemq:activemq-client:6.2.4"
+	testImplementation "org.apache.activemq:activemq-openwire-legacy:6.2.4"
 	testImplementation 'org.apache.activemq.tooling:activemq-junit:6.2.4'
 	testImplementation 'org.apache.activemq:activemq-kahadb-store:6.2.4'
 
